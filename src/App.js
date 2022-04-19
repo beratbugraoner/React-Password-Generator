@@ -7,7 +7,12 @@ function App() {
   const [passwordLength, setPasswordLength] = useState(6);
   const [password, setPassword] = useState("");
   const [passwords, setPasswords] = useState([]);
-  const[btnDisable,setBtnDisabled]=useState(false);
+  const [btnDisable, setBtnDisabled] = useState(false);
+
+  useEffect(() => {
+    const generatedPassword = generatePassword(passwordLength);
+    setPassword(generatedPassword);
+  },[]);
 
   const handleSliderChange = (e) => {
     setPasswordLength(e.target.value);
@@ -17,7 +22,7 @@ function App() {
   }
 
   const setPasswordLengthColor = (pwLength) => {
-    if(!pwLength) pwLength=passwordLength;
+    if (!pwLength) pwLength = passwordLength;
 
     if (pwLength < 11) return "bg-danger";
     else if (pwLength >= 11 && pwLength < 20) return "bg-warning";
@@ -29,6 +34,24 @@ function App() {
     setPasswords([...passwords, password]);
     setBtnDisabled(true);
 
+  }
+
+  const handlePasswordInputClick = (e) =>{
+    e.target.select();
+    document.execCommand("copy");
+    e.target.focus();
+
+    const selectedPassword = passwords.find(p => p===e.target.value);
+    if (!selectedPassword) {
+      const updatedPasswords = [...passwords,e.target.value];
+      setPasswords(updatedPasswords);
+      setBtnDisabled(true);
+    }
+  }
+
+  const handleResetPasswordClick = (e) =>{
+    setPasswords([]);
+    setBtnDisabled(false);
   }
 
   return (
@@ -65,10 +88,11 @@ function App() {
                     style={{ cursor: 'pointer' }}
                     value={password}
                     readOnly={true}
+                    onClick={(e)=>handlePasswordInputClick(e)}
                   />
                   <button className="btn btn-info mt-3 " disabled={btnDisable} onClick={(e) => handleSaveButtonClick(e)}>Save</button>
 
-                  <button className="btn btn-outline-info mt-3 float-end ">Reset Saved Passwords</button>
+                  <button className="btn btn-outline-info mt-3 float-end " onClick={(e => handleResetPasswordClick(e))}>Reset Saved Passwords</button>
 
                 </div>
               </div>
@@ -79,12 +103,12 @@ function App() {
                   <h2 className="text-info">Recent Generated Passwords</h2>
                 </div>
                 <ul className="list-group list-group-flush text-center">
-                  {passwords.map((password,index)=>(
-                    <li key={index} className="list-group-item"><span className="fst-italic float-start">{ index + 1 }</span>
-                    <div className={`badge ${setPasswordLengthColor(password.length)}`} style={{ cursor: 'pointer' }}>
-                     {password}
-                    </div>
-                  </li>
+                  {passwords && passwords.map((password, index) => (
+                    <li key={index} className="list-group-item"><span className="fst-italic float-start">{index + 1}</span>
+                      <div className={`badge ${setPasswordLengthColor(password.length)}`} style={{ cursor: 'pointer' }}>
+                        {password}
+                      </div>
+                    </li>
                   ))}
                 </ul>
               </div>
